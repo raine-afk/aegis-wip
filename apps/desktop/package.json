@@ -1,0 +1,9 @@
+{
+  "name": "@aegis/desktop",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/main/index.js",
+  "module": "./dist/renderer/index.js",
+  "types": "./dist/main/index.d.ts"
+}

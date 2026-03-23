@@ -1,0 +1,15 @@
+node_modules/
+
+# build output
+dist/
+out/
+release/
+coverage/
+*.tsbuildinfo
+
+# app tooling
+.vite/
+.playwright/
+
+# local project state
+.aegis/

@@ -1,0 +1,8 @@
+{
+  "name": "@aegis/storage",
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts"
+}

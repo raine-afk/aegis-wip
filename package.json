@@ -1,0 +1,17 @@
+{
+  "name": "aegis",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "bun@1.3.9",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "echo 'Workspace bootstrapped. Desktop dev shell lands in Task 2.'",
+    "build": "echo 'Build pipeline not wired yet.'",
+    "test": "echo 'No tests yet. Task 3 starts contract coverage.'",
+    "lint": "echo 'Linting not wired yet.'",
+    "typecheck": "echo 'Typechecking not wired yet.'"
+  }
+}

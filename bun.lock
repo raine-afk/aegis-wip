@@ -1,0 +1,64 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "aegis",
+    },
+    "apps/desktop": {
+      "name": "@aegis/desktop",
+      "version": "0.0.0",
+    },
+    "packages/inference": {
+      "name": "@aegis/inference",
+      "version": "0.0.0",
+    },
+    "packages/memory": {
+      "name": "@aegis/memory",
+      "version": "0.0.0",
+    },
+    "packages/reviewer": {
+      "name": "@aegis/reviewer",
+      "version": "0.0.0",
+    },
+    "packages/runtime": {
+      "name": "@aegis/runtime",
+      "version": "0.0.0",
+    },
+    "packages/shared": {
+      "name": "@aegis/shared",
+      "version": "0.0.0",
+    },
+    "packages/storage": {
+      "name": "@aegis/storage",
+      "version": "0.0.0",
+    },
+    "packages/tools": {
+      "name": "@aegis/tools",
+      "version": "0.0.0",
+    },
+    "packages/ui": {
+      "name": "@aegis/ui",
+      "version": "0.0.0",
+    },
+  },
+  "packages": {
+    "@aegis/desktop": ["@aegis/desktop@workspace:apps/desktop"],
+
+    "@aegis/inference": ["@aegis/inference@workspace:packages/inference"],
+
+    "@aegis/memory": ["@aegis/memory@workspace:packages/memory"],
+
+    "@aegis/reviewer": ["@aegis/reviewer@workspace:packages/reviewer"],
+
+    "@aegis/runtime": ["@aegis/runtime@workspace:packages/runtime"],
+
+    "@aegis/shared": ["@aegis/shared@workspace:packages/shared"],
+
+    "@aegis/storage": ["@aegis/storage@workspace:packages/storage"],
+
+    "@aegis/tools": ["@aegis/tools@workspace:packages/tools"],
+
+    "@aegis/ui": ["@aegis/ui@workspace:packages/ui"],
+  }
+}
