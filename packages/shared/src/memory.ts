@@ -1,6 +1,13 @@
 export const memoryTypes = ["fact", "decision", "task-summary"] as const;
 export type MemoryType = (typeof memoryTypes)[number];
 
+export const memoryTypeDirectories = {
+  fact: "facts",
+  decision: "decisions",
+  "task-summary": "task-summaries"
+} as const satisfies Record<MemoryType, string>;
+export type MemoryDirectoryName = (typeof memoryTypeDirectories)[MemoryType];
+
 export const memoryStatuses = ["active", "superseded"] as const;
 export type MemoryStatus = (typeof memoryStatuses)[number];
 
