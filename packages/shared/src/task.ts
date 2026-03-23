@@ -58,6 +58,9 @@ export interface TaskRecord {
 export const taskResumeSelections = ["last-active", "explicit"] as const;
 export type TaskResumeSelection = (typeof taskResumeSelections)[number];
 
+export const runtimeSessionOrigins = ["started", "resumed"] as const;
+export type RuntimeSessionOrigin = (typeof runtimeSessionOrigins)[number];
+
 export interface ResumableTaskState {
   selection: TaskResumeSelection;
   task: TaskRecord;
