@@ -1,0 +1,219 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  background:
+    radial-gradient(circle at top, rgba(80, 111, 255, 0.18), transparent 32%),
+    linear-gradient(180deg, #0a0f1d 0%, #060912 100%);
+  color: #e5ecff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+.shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr) 88px;
+  gap: 24px;
+  padding: 24px;
+}
+
+.side-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+}
+
+.align-end {
+  align-items: stretch;
+}
+
+.rail-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #7f8cb4;
+  text-align: center;
+}
+
+.panel-chip {
+  border-radius: 18px;
+  padding: 18px 10px;
+  min-height: 88px;
+  background: rgba(11, 16, 32, 0.72);
+  border: 1px solid rgba(134, 151, 200, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  cursor: default;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b7c3ea;
+}
+
+.workstream {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 24px;
+}
+
+.hero-card,
+.canvas-card {
+  border-radius: 28px;
+  border: 1px solid rgba(134, 151, 200, 0.18);
+  background: rgba(11, 16, 32, 0.78);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.hero-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 32px;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color: #93a4d8;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.76rem;
+}
+
+.hero-card h1,
+.canvas-card h2 {
+  margin: 0;
+}
+
+.hero-copy {
+  max-width: 52ch;
+  margin: 12px 0 0;
+  color: #b7c3ea;
+}
+
+.hero-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.status-pill,
+.canvas-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: rgba(80, 111, 255, 0.16);
+  border: 1px solid rgba(103, 129, 255, 0.36);
+  color: #d8e0ff;
+}
+
+.status-pill.muted,
+.canvas-badge {
+  background: rgba(80, 95, 132, 0.2);
+  border-color: rgba(134, 151, 200, 0.24);
+  color: #b7c3ea;
+}
+
+.canvas-card {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.canvas-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.canvas-body {
+  display: grid;
+  place-items: center;
+  min-height: 360px;
+  border-radius: 22px;
+  padding: 32px;
+  border: 1px dashed rgba(134, 151, 200, 0.22);
+  background: linear-gradient(180deg, rgba(21, 29, 55, 0.72), rgba(9, 14, 29, 0.72));
+  text-align: center;
+}
+
+.canvas-body p {
+  margin: 0 0 16px;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.canvas-body ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  max-width: 52ch;
+  color: #b7c3ea;
+  text-align: left;
+}
+
+.canvas-body li + li {
+  margin-top: 10px;
+}
+
+@media (max-width: 1100px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .side-rail {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .panel-chip {
+    writing-mode: horizontal-tb;
+    min-height: auto;
+    min-width: 120px;
+  }
+
+  .hero-card,
+  .canvas-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-meta {
+    align-items: flex-start;
+  }
+}

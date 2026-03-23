@@ -3,7 +3,27 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "main": "./dist/main/index.js",
-  "module": "./dist/renderer/index.js",
-  "types": "./dist/main/index.d.ts"
+  "main": "./dist/main/index.cjs",
+  "types": "./src/main/index.ts",
+  "scripts": {
+    "build": "bun run build:main && vite build",
+    "build:main": "esbuild src/main/index.ts src/main/preload.ts --bundle --platform=node --format=cjs --outdir=dist/main --external:electron --out-extension:.js=.cjs",
+    "dev": "bun run build:main && bash -lc 'trap \"kill 0\" EXIT; vite --host 127.0.0.1 --port 5173 >/tmp/aegis-desktop-vite.log 2>&1 & until curl -sf http://127.0.0.1:5173 >/dev/null; do sleep 1; done; AEGIS_RENDERER_URL=http://127.0.0.1:5173 electron dist/main/index.cjs'",
+    "test": "bun test",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "electron": "^41.0.3",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "esbuild": "^0.27.4",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.2"
+  }
 }
