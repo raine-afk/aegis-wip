@@ -1,3 +1,4 @@
+import type { Database } from "bun:sqlite";
 import type { DecisionMemory, FactMemory, TaskSummaryMemory } from "../../shared/src/memory";
 import { MemoryFileStore } from "./file-store";
 import {
@@ -11,6 +12,7 @@ import {
 
 export interface MemoryWritePipelineOptions {
   repoRoot: string;
+  database?: Database;
 }
 
 export class MemoryWritePipeline {
@@ -38,5 +40,7 @@ export class MemoryWritePipeline {
 export function createMemoryWritePipeline(
   options: MemoryWritePipelineOptions
 ): MemoryWritePipeline {
-  return new MemoryWritePipeline(new MemoryFileStore({ repoRoot: options.repoRoot }));
+  return new MemoryWritePipeline(
+    new MemoryFileStore({ repoRoot: options.repoRoot, database: options.database })
+  );
 }

@@ -3,64 +3,15 @@ import type { Database } from "bun:sqlite";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { MemoryRecord, TaskRecord } from "../../shared/src/index";
-import { initializeSqlite } from "../../storage/src/sqlite";
-import { createMemoryWritePipeline, MemoryFileStore, retrieveMemories, supersedeMemory } from "./index";
+import type { TaskRecord } from "../../shared/src/index";
+import { bootstrapStorage, initializeSqlite } from "../../storage/src/index";
+import { createMemoryWritePipeline, retrieveMemories, supersedeMemory } from "./index";
 
 const tempRepos: string[] = [];
 
 afterEach(async () => {
   await Promise.all(tempRepos.splice(0).map((path) => rm(path, { recursive: true, force: true })));
 });
-
-function indexMemory(database: Database, repoRoot: string, record: MemoryRecord): void {
-  const fileStore = new MemoryFileStore({ repoRoot });
-  const canonicalPath = fileStore.getFilePath(record.type, record.id);
-
-  database
-    .query(
-      `
-        INSERT INTO memory_index (
-          id,
-          type,
-          status,
-          confidence,
-          title,
-          summary,
-          canonical_path,
-          provenance_json,
-          source_refs_json,
-          supersedes_json,
-          superseded_by,
-          tags_json,
-          related_files_json,
-          related_tasks_json,
-          payload_json,
-          created_at,
-          updated_at
-        ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17)
-      `
-    )
-    .run(
-      record.id,
-      record.type,
-      record.status,
-      record.confidence,
-      record.title,
-      record.summary,
-      canonicalPath,
-      JSON.stringify(record.provenance),
-      JSON.stringify(record.sourceRefs),
-      JSON.stringify(record.supersedes),
-      record.supersededBy ?? null,
-      JSON.stringify(record.tags),
-      JSON.stringify(record.relatedFiles),
-      JSON.stringify(record.relatedTasks),
-      JSON.stringify(record),
-      record.createdAt,
-      record.updatedAt
-    );
-}
 
 function insertTask(database: Database, task: TaskRecord): void {
   database
@@ -105,7 +56,7 @@ describe("memory retrieval", () => {
     const repoRoot = await mkdtemp(join(tmpdir(), "aegis-memory-retrieval-"));
     tempRepos.push(repoRoot);
 
-    const database = await initializeSqlite(join(repoRoot, "aegis.db"));
+    const paths = await bootstrapStorage({ repoRoot });
     const pipeline = createMemoryWritePipeline({ repoRoot });
 
     const linkedDecision = await pipeline.writeDecision({
@@ -198,9 +149,7 @@ describe("memory retrieval", () => {
       relatedFiles: ["packages/storage/src/sqlite.ts"]
     });
 
-    for (const record of [linkedDecision, semanticFact, staleFact, successorFact, tentativeFact]) {
-      indexMemory(database, repoRoot, record);
-    }
+    const database = await initializeSqlite(paths.database);
 
     insertTask(database, {
       id: "task-7",
@@ -271,7 +220,7 @@ describe("memory retrieval", () => {
     const repoRoot = await mkdtemp(join(tmpdir(), "aegis-memory-retrieval-"));
     tempRepos.push(repoRoot);
 
-    const database = await initializeSqlite(join(repoRoot, "aegis.db"));
+    const paths = await bootstrapStorage({ repoRoot });
     const pipeline = createMemoryWritePipeline({ repoRoot });
 
     const original = await pipeline.writeFact({
@@ -298,8 +247,7 @@ describe("memory retrieval", () => {
       }
     });
 
-    indexMemory(database, repoRoot, original);
-    indexMemory(database, repoRoot, replacement);
+    const database = await initializeSqlite(paths.database);
 
     await supersedeMemory({
       database,
