@@ -41,3 +41,9 @@ CREATE TABLE IF NOT EXISTS memory_index (
 CREATE INDEX IF NOT EXISTS idx_memory_index_status ON memory_index (status);
 CREATE INDEX IF NOT EXISTS idx_memory_index_type_status ON memory_index (type, status);
 CREATE INDEX IF NOT EXISTS idx_memory_index_updated_at ON memory_index (updated_at);
+CREATE INDEX IF NOT EXISTS idx_memory_index_status_confidence_updated_at ON memory_index (
+  status,
+  confidence,
+  updated_at DESC
+);
+CREATE INDEX IF NOT EXISTS idx_memory_index_superseded_by ON memory_index (superseded_by);

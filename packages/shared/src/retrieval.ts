@@ -1,4 +1,4 @@
-import type { MemoryRecord } from "./memory";
+import type { MemoryConfidence, MemoryRecord } from "./memory";
 
 export const retrievalReasonKinds = [
   "task-link",
@@ -16,6 +16,8 @@ export interface MemoryRetrievalQuery {
   tags?: string[];
   limit: number;
   includeSuperseded?: boolean;
+  minConfidence?: Exclude<MemoryConfidence, "superseded">;
+  updatedAfter?: string;
 }
 
 export interface MemoryRetrievalReason {
