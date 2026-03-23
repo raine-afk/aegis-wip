@@ -22,7 +22,7 @@ describe("shared contracts", () => {
       type: "fact",
       title: "Project uses Bun workspaces",
       summary: "The repo is organized as a Bun workspace monorepo.",
-      status: "active",
+      status: "confirmed",
       confidence: "confirmed",
       provenance: {
         source: "repo",
@@ -49,7 +49,7 @@ describe("shared contracts", () => {
       type: "decision",
       title: "Use SQLite for structured state",
       summary: "SQLite stores indexed task and retrieval state.",
-      status: "active",
+      status: "confirmed",
       confidence: "confirmed",
       provenance: {
         source: "user",
@@ -78,7 +78,7 @@ describe("shared contracts", () => {
       type: "task-summary",
       title: "Desktop shell scaffolded",
       summary: "The Electron shell opens and exposes a narrow preload bridge.",
-      status: "active",
+      status: "probable",
       confidence: "probable",
       provenance: {
         source: "agent",
@@ -232,7 +232,7 @@ describe("shared contracts", () => {
     ];
 
     expect(memoryTypes).toEqual(["fact", "decision", "task-summary"]);
-    expect(memoryStatuses).toEqual(["active", "superseded"]);
+    expect(memoryStatuses).toEqual(["tentative", "probable", "confirmed", "superseded"]);
     expect(memoryConfidences).toEqual(["tentative", "probable", "confirmed"]);
     expect(taskModes).toEqual(["plan", "build", "review"]);
     expect(taskStatuses).toEqual([
