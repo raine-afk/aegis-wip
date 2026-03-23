@@ -1,10 +1,17 @@
-import type { TaskMode, TaskResumeSelection, TaskRecord, RuntimeSessionOrigin } from "../../../shared/src/task";
+import type { RuntimeSessionOrigin, TaskMode, TaskResumeSelection, TaskRecord } from "../../../shared/src/task";
 import type { CreateTaskInput } from "../tasks/task-events";
 import { TaskService } from "../tasks/task-service";
 import { ContextBuilder, type RuntimeMemoryRetriever, type RuntimeSessionContext } from "./context-builder";
 import { ModeController, type RuntimeModeFlow } from "./mode-controller";
 
-export interface StartRuntimeSessionInput extends CreateTaskInput {}
+const runtimeStartMode: TaskMode = "plan";
+const runtimeResumeMode: TaskMode = "build";
+
+function nowIso(): string {
+  return new Date().toISOString();
+}
+
+export interface StartRuntimeSessionInput extends Omit<CreateTaskInput, "mode" | "status"> {}
 
 export interface ResumeRuntimeSessionInput {
   taskId?: string;
@@ -37,7 +44,12 @@ export class RuntimeSession {
   }
 
   async start(input: StartRuntimeSessionInput): Promise<RuntimeTaskSession> {
-    const task = this.options.taskService.createTask(input);
+    const task = this.options.taskService.createTask({
+      ...input,
+      mode: runtimeStartMode,
+      status: "in-progress"
+    });
+
     return this.createSession({
       origin: "started",
       task
@@ -51,17 +63,26 @@ export class RuntimeSession {
       throw new Error(input.taskId ? `Task ${input.taskId} is not resumable.` : "No resumable task found.");
     }
 
-    const nextMode = input.mode ?? resumableState.task.mode;
+    const nextMode = input.mode ?? runtimeResumeMode;
+    const updatedAt = input.updatedAt ?? nowIso();
+    const nextTask: TaskRecord = {
+      ...resumableState.task,
+      mode: nextMode,
+      status: "in-progress",
+      updatedAt
+    };
+    const context = await this.contextBuilder.build({ task: nextTask });
     const task = this.options.taskService.updateTask(resumableState.task.id, {
       mode: nextMode,
       status: "in-progress",
-      updatedAt: input.updatedAt
+      updatedAt
     });
 
     return this.createSession({
       origin: "resumed",
       selection: resumableState.selection,
-      task
+      task,
+      context
     });
   }
 
@@ -69,13 +90,14 @@ export class RuntimeSession {
     origin: RuntimeSessionOrigin;
     task: TaskRecord;
     selection?: TaskResumeSelection;
+    context?: RuntimeSessionContext;
   }): Promise<RuntimeTaskSession> {
     return {
       origin: input.origin,
       selection: input.selection,
       task: input.task,
       flow: this.modeController.get(input.task.mode),
-      context: await this.contextBuilder.build({ task: input.task })
+      context: input.context ?? (await this.contextBuilder.build({ task: input.task }))
     };
   }
 }

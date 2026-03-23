@@ -94,7 +94,7 @@ export class ContextBuilder {
         resumeHints: task.resumeHints
       },
       relatedFiles: task.relatedFiles.slice(0, compactFileLimit),
-      memories: response.results.map((result) => ({
+      memories: response.results.slice(0, compactMemoryLimit).map((result) => ({
         id: result.memory.id,
         type: result.memory.type,
         title: result.memory.title,

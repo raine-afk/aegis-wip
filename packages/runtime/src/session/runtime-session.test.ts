@@ -73,7 +73,185 @@ function createDecisionMemory(
   };
 }
 
+async function createHarness(memoryRetriever: {
+  retrieve(query: MemoryRetrievalQuery): MemoryRetrievalResponse | Promise<MemoryRetrievalResponse>;
+}) {
+  const repoRoot = await mkdtemp(join(tmpdir(), "aegis-runtime-session-"));
+  tempDirs.push(repoRoot);
+
+  const database = await initializeSqlite(join(repoRoot, "aegis.db"));
+  const taskService = new TaskService(new TaskRepository(database));
+  const runtimeSession = new RuntimeSession({
+    taskService,
+    memoryRetriever
+  });
+
+  return {
+    database,
+    taskService,
+    runtimeSession
+  };
+}
+
 describe("runtime session", () => {
+  test("start enforces plan mode and in-progress status for new runtime tasks", async () => {
+    const { database, taskService, runtimeSession } = await createHarness({
+      retrieve(query) {
+        return {
+          query,
+          results: []
+        };
+      }
+    });
+
+    try {
+      const started = await runtimeSession.start({
+        id: "task-start-runtime",
+        title: "Start runtime orchestration with encoded defaults",
+        goal: "New runtime sessions should always begin planning.",
+        mode: "review",
+        status: "interrupted",
+        createdAt: "2026-03-23T21:00:00.000Z",
+        updatedAt: "2026-03-23T21:00:00.000Z"
+      } as never);
+
+      expect(started.task.mode).toBe("plan");
+      expect(started.task.status).toBe("in-progress");
+      expect(taskService.getTaskById("task-start-runtime")).toMatchObject({
+        mode: "plan",
+        status: "in-progress"
+      });
+    } finally {
+      database.close();
+    }
+  });
+
+  test("resume defaults interrupted tasks into build mode", async () => {
+    const { database, taskService, runtimeSession } = await createHarness({
+      retrieve(query) {
+        return {
+          query,
+          results: []
+        };
+      }
+    });
+
+    try {
+      taskService.createTask({
+        id: "task-resume-runtime",
+        title: "Carry a planned runtime task into build mode",
+        goal: "Resumed runtime sessions should execute the saved plan by default.",
+        mode: "plan",
+        status: "interrupted",
+        createdAt: "2026-03-23T21:10:00.000Z",
+        updatedAt: "2026-03-23T21:10:00.000Z"
+      });
+
+      const resumed = await runtimeSession.resume({
+        taskId: "task-resume-runtime"
+      });
+
+      expect(resumed.task.mode).toBe("build");
+      expect(resumed.task.status).toBe("in-progress");
+      expect(taskService.getTaskById("task-resume-runtime")).toMatchObject({
+        mode: "build",
+        status: "in-progress"
+      });
+    } finally {
+      database.close();
+    }
+  });
+
+  test("resume does not persist half-resumed state when context assembly fails", async () => {
+    const { database, taskService, runtimeSession } = await createHarness({
+      retrieve() {
+        throw new Error("memory retrieval failed");
+      }
+    });
+
+    try {
+      taskService.createTask({
+        id: "task-resume-failure",
+        title: "Resume runtime work only after context is ready",
+        goal: "A failed resume should leave persisted task state untouched.",
+        mode: "plan",
+        status: "interrupted",
+        createdAt: "2026-03-23T21:20:00.000Z",
+        updatedAt: "2026-03-23T21:20:00.000Z",
+        resumeHints: {
+          summary: "The plan is done.",
+          nextStep: "Start implementing the runtime loop."
+        }
+      });
+
+      await expect(
+        runtimeSession.resume({
+          taskId: "task-resume-failure"
+        })
+      ).rejects.toThrow("memory retrieval failed");
+
+      expect(taskService.getTaskById("task-resume-failure")).toMatchObject({
+        mode: "plan",
+        status: "interrupted",
+        updatedAt: "2026-03-23T21:20:00.000Z"
+      });
+    } finally {
+      database.close();
+    }
+  });
+
+  test("clamps memory results locally when the retriever over-returns", async () => {
+    const overReturnedMemories = Array.from({ length: 6 }, (_, index) =>
+      createFactMemory({
+        id: `memory-${index + 1}`,
+        title: `Runtime memory ${index + 1}`,
+        summary: `Compact runtime context entry ${index + 1}`,
+        relatedFiles: ["packages/runtime/src/session/context-builder.ts"],
+        relatedTasks: ["task-context-clamp"]
+      })
+    );
+
+    const { database, runtimeSession } = await createHarness({
+      retrieve(query) {
+        return {
+          query,
+          results: overReturnedMemories.map((memory, index) => ({
+            memory,
+            score: 1 - index * 0.01,
+            reasons: [
+              {
+                kind: "task-link",
+                score: 1,
+                detail: "Linked to the current runtime task."
+              }
+            ]
+          }))
+        };
+      }
+    });
+
+    try {
+      const started = await runtimeSession.start({
+        id: "task-context-clamp",
+        title: "Keep runtime context compact even with noisy retrievers",
+        goal: "Only the top compact memory slice should survive into runtime context.",
+        mode: "review",
+        status: "blocked",
+        createdAt: "2026-03-23T21:30:00.000Z",
+        updatedAt: "2026-03-23T21:30:00.000Z"
+      } as never);
+
+      expect(started.context.memories.map((memory) => memory.id)).toEqual([
+        "memory-1",
+        "memory-2",
+        "memory-3",
+        "memory-4"
+      ]);
+    } finally {
+      database.close();
+    }
+  });
+
   test("starts a task in plan mode, resumes it in build mode, and requests only compact relevant memory", async () => {
     const repoRoot = await mkdtemp(join(tmpdir(), "aegis-runtime-session-"));
     tempDirs.push(repoRoot);
@@ -161,7 +339,6 @@ describe("runtime session", () => {
       id: "task-8",
       title: "Build the runtime mode loop and task session orchestration",
       goal: "Start in plan mode, resume in build mode, and keep session context compact.",
-      mode: "plan",
       createdAt: "2026-03-23T20:40:00.000Z",
       relatedFiles: [
         "packages/runtime/src/session/runtime-session.ts",
