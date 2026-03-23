@@ -1,10 +1,10 @@
 export const memoryTypes = ["fact", "decision", "task-summary"] as const;
 export type MemoryType = (typeof memoryTypes)[number];
 
-export const memoryStatuses = ["tentative", "probable", "confirmed", "superseded"] as const;
+export const memoryStatuses = ["active", "superseded"] as const;
 export type MemoryStatus = (typeof memoryStatuses)[number];
 
-export const memoryConfidences = ["tentative", "probable", "confirmed"] as const;
+export const memoryConfidences = ["tentative", "probable", "confirmed", "superseded"] as const;
 export type MemoryConfidence = (typeof memoryConfidences)[number];
 
 export const memoryProvenanceSources = ["user", "agent", "system", "tool", "repo"] as const;

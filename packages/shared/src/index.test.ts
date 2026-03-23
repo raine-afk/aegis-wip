@@ -22,7 +22,7 @@ describe("shared contracts", () => {
       type: "fact",
       title: "Project uses Bun workspaces",
       summary: "The repo is organized as a Bun workspace monorepo.",
-      status: "confirmed",
+      status: "active",
       confidence: "confirmed",
       provenance: {
         source: "repo",
@@ -49,7 +49,7 @@ describe("shared contracts", () => {
       type: "decision",
       title: "Use SQLite for structured state",
       summary: "SQLite stores indexed task and retrieval state.",
-      status: "confirmed",
+      status: "active",
       confidence: "confirmed",
       provenance: {
         source: "user",
@@ -78,7 +78,7 @@ describe("shared contracts", () => {
       type: "task-summary",
       title: "Desktop shell scaffolded",
       summary: "The Electron shell opens and exposes a narrow preload bridge.",
-      status: "probable",
+      status: "active",
       confidence: "probable",
       provenance: {
         source: "agent",
@@ -100,6 +100,34 @@ describe("shared contracts", () => {
       relatedTasks: ["task-2"],
       taskId: "task-2",
       outcome: "completed"
+    };
+
+    const supersededMemory: Shared.FactMemory = {
+      id: "mem-fact-2",
+      type: "fact",
+      title: "Legacy shell path",
+      summary: "The old desktop entrypoint path has been replaced.",
+      status: "superseded",
+      confidence: "superseded",
+      provenance: {
+        source: "repo",
+        recordedAt: "2026-03-23T19:12:00.000Z",
+        reason: "The newer shell scaffold replaced the legacy path"
+      },
+      sourceRefs: [
+        {
+          kind: "file",
+          value: "apps/desktop/src/main/index.ts",
+          label: "desktop main process entry"
+        }
+      ],
+      createdAt: "2026-03-23T19:12:00.000Z",
+      updatedAt: "2026-03-23T19:12:00.000Z",
+      supersedes: [],
+      supersededBy: taskSummaryMemory.id,
+      tags: ["desktop", "legacy"],
+      relatedFiles: ["apps/desktop/src/main/index.ts"],
+      relatedTasks: ["task-2"]
     };
 
     const task: Shared.TaskRecord = {
@@ -228,12 +256,13 @@ describe("shared contracts", () => {
     const sharedMemory: Shared.MemoryRecord[] = [
       factMemory,
       decisionMemory,
-      taskSummaryMemory
+      taskSummaryMemory,
+      supersededMemory
     ];
 
     expect(memoryTypes).toEqual(["fact", "decision", "task-summary"]);
-    expect(memoryStatuses).toEqual(["tentative", "probable", "confirmed", "superseded"]);
-    expect(memoryConfidences).toEqual(["tentative", "probable", "confirmed"]);
+    expect(memoryStatuses).toEqual(["active", "superseded"]);
+    expect(memoryConfidences).toEqual(["tentative", "probable", "confirmed", "superseded"]);
     expect(taskModes).toEqual(["plan", "build", "review"]);
     expect(taskStatuses).toEqual([
       "pending",
@@ -273,7 +302,7 @@ describe("shared contracts", () => {
       "untracked",
       "conflicted"
     ]);
-    expect(sharedMemory).toHaveLength(3);
+    expect(sharedMemory).toHaveLength(4);
     expect(task.planSnapshot?.steps).toContain("implement contracts");
     expect(reviewerOutput.blockingIssues[0]?.code).toBe("missing-verification");
     expect(retrievalQuery.taskId).toBe(task.id);
