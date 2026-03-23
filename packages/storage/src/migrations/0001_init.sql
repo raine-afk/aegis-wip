@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS tasks (
 
 CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks (status);
 CREATE INDEX IF NOT EXISTS idx_tasks_updated_at ON tasks (updated_at);
+CREATE INDEX IF NOT EXISTS idx_tasks_status_updated_at ON tasks (status, updated_at DESC);
 
 CREATE TABLE IF NOT EXISTS memory_index (
   id TEXT PRIMARY KEY,

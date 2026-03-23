@@ -54,3 +54,11 @@ export interface TaskRecord {
   completionSummary?: TaskCompletionSummary;
   resumeHints?: TaskResumeHints;
 }
+
+export const taskResumeSelections = ["last-active", "explicit"] as const;
+export type TaskResumeSelection = (typeof taskResumeSelections)[number];
+
+export interface ResumableTaskState {
+  selection: TaskResumeSelection;
+  task: TaskRecord;
+}
