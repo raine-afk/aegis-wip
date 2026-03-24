@@ -8,7 +8,7 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "bash -lc 'if [ \"$1\" = \"--filter\" ] && [ \"$2\" = \"apps/desktop\" ]; then cd apps/desktop && bun run dev; else echo \"Use: bun run dev --filter apps/desktop\"; exit 1; fi' --",
+    "dev": "bun run --filter @aegis/desktop dev",
     "build": "echo 'Build pipeline not wired yet.'",
     "test": "echo 'No tests yet. Task 3 starts contract coverage.'",
     "lint": "echo 'Linting not wired yet.'",
